@@ -1,6 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
+// import { atom, useRecoilState } from "recoil";
+
+// const catListState = atom({
+//   key: "catListState",
+//   default: [],
+// });
+
 interface CatsInterface {
   id: string;
   url: string;
@@ -11,6 +18,8 @@ interface CatsInterface {
 }
 
 function CatViewer() {
+  // const [catList, setCatList] = useRecoilState(catListState);
+
   async function fetchCats() {
     return await axios
       .get("https://api.thecatapi.com/v1/images/search", {
