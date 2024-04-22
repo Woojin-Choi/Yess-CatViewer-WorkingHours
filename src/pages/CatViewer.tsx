@@ -1,8 +1,9 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import styled from "styled-components";
+import * as S from "../styles/CatViewerStyle";
+import { fetchCats } from "../api";
+import { CatsInterface } from "../model";
 
 // import { atom, useRecoilState } from "recoil";
 
@@ -10,48 +11,6 @@ import styled from "styled-components";
 //   key: "catListState",
 //   default: [],
 // });
-
-interface CatsInterface {
-  id: string;
-  url: string;
-  width: number;
-  height: number;
-  breeds: [];
-  categories: [];
-}
-
-const CatViewerContainer = styled.div`
-  display: flex;
-  justify-content: center;
-`;
-
-const CatViewerListContainer = styled.div`
-  max-width: 1200px;
-  border: 1px solid black;
-`;
-
-const CatVieweImage = styled.img`
-  width: 100%;
-  /* padding: 16px; */
-`;
-
-const Loading = styled.div`
-  font-size: 50px;
-  font-weight: bold;
-`;
-
-const HorizontalFlex = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: 16px;
-  padding: 16px;
-`;
-const VerticalFlex = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  gap: 16px;
-`;
 
 function CatViewer() {
   const { ref, inView } = useInView();
@@ -70,17 +29,6 @@ function CatViewer() {
     };
   }, []);
 
-  const fetchTodos = async ({ pageParam }: { pageParam: number }) => {
-    const res = await axios.get("https://api.thecatapi.com/v1/images/search", {
-      params: { limit: 30, page: pageParam },
-      headers: {
-        "x-api-key":
-          "live_k77YJ1Sa3RsUfqEwbuKzrsevPSBW7iCoeeTZKSuj0ahl51TyYwbMXoLhVwwyIIvF",
-      },
-    });
-    return res.data;
-  };
-
   const {
     data,
     // status,
@@ -92,7 +40,7 @@ function CatViewer() {
     isLoading,
   } = useInfiniteQuery({
     queryKey: ["getCats"],
-    queryFn: fetchTodos,
+    queryFn: fetchCats,
     initialPageParam: 1,
     getNextPageParam: (allPages) => {
       return allPages.length + 1;
@@ -112,7 +60,7 @@ function CatViewer() {
     for (let i = 0; data && i < data?.pageParams.length; i++) {
       for (let j = 0; j < data.pages[i].length; j++) {
         if (colCount < 2) {
-          console.log("just one column!");
+          // console.log("just one column!");
           if (!colGrids[0]) {
             colGrids[0] = [];
           }
@@ -131,35 +79,35 @@ function CatViewer() {
   }, [data, innerWidth]);
 
   useEffect(() => {
-    if (data && data.pages.length > 1 && inView) {
-      // console.log("in view!!");
+    if (data && data.pages.length > 0 && inView) {
+      console.log("in view!!");
       fetchNextPage();
     }
   }, [data, fetchNextPage, inView]);
 
-  if (isLoading) return <Loading>Loading...</Loading>;
+  if (isLoading) return <S.Loading>Loading...</S.Loading>;
 
   if (isError) return <div>Error...</div>;
 
   return (
-    <CatViewerContainer>
-      <CatViewerListContainer>
-        <HorizontalFlex>
+    <S.CatViewerContainer>
+      <S.CatViewerListContainer>
+        <S.HorizontalFlex>
           {getItemInColumn().map((item, idx) => {
             return (
-              <VerticalFlex className={`column${idx}`}>
+              <S.VerticalFlex className={`column${idx}`}>
                 {/* {item[0].url} */}
                 {item.map((cat: CatsInterface) => {
-                  return <CatVieweImage src={cat.url} alt="this is cat" />;
+                  return <S.CatVieweImage src={cat.url} alt="this is cat" />;
                 })}
-              </VerticalFlex>
+              </S.VerticalFlex>
             );
           })}
-        </HorizontalFlex>
-        {isFetchingNextPage && <Loading>Loading...</Loading>}
+        </S.HorizontalFlex>
+        {isFetchingNextPage && <S.Loading>Loading...</S.Loading>}
         <div ref={ref} />
-      </CatViewerListContainer>
-    </CatViewerContainer>
+      </S.CatViewerListContainer>
+    </S.CatViewerContainer>
   );
 }
 
