@@ -13,28 +13,22 @@ import { CatsInterface } from "../model";
 // });
 
 function CatViewer() {
-  const { ref, inView } = useInView();
+  const { ref, inView } = useInView({
+    initialInView: true,
+  });
 
   const [innerWidth, setInnerWidth] = useState(window.innerWidth);
   const [expandedImageId, setExpandedImageId] = useState("");
 
-  const {
-    data,
-    // status,
-    // error,
-    // hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage,
-    isError,
-    isLoading,
-  } = useInfiniteQuery({
-    queryKey: ["getCats"],
-    queryFn: fetchCats,
-    initialPageParam: 1,
-    getNextPageParam: (allPages) => {
-      return allPages.length + 1;
-    },
-  });
+  const { data, status, error, fetchNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["getCats"],
+      queryFn: fetchCats,
+      initialPageParam: 1,
+      getNextPageParam: (allPages) => {
+        return allPages.length + 1;
+      },
+    });
 
   const toggleImage = (selectedImageId: string) => {
     if (expandedImageId === selectedImageId) {
@@ -42,7 +36,6 @@ function CatViewer() {
     } else {
       setExpandedImageId(selectedImageId);
     }
-    console.log(selectedImageId);
   };
 
   const getItemInColumn = useCallback(() => {
@@ -54,11 +47,10 @@ function CatViewer() {
     } else {
       colCount = 3;
     }
-    let colGrids = new Array(colCount); // [0: [{},{},], 1: [{}, {}]],
+    let colGrids = new Array(colCount); // [0: [{},{},], 1: [{},{}]...]
     for (let i = 0; data && i < data?.pageParams.length; i++) {
       for (let j = 0; j < data.pages[i].length; j++) {
         if (colCount < 2) {
-          // console.log("just one column!");
           if (!colGrids[0]) {
             colGrids[0] = [];
           }
@@ -79,7 +71,6 @@ function CatViewer() {
   useEffect(() => {
     const resizeListener = () => {
       setInnerWidth(window.innerWidth);
-      // console.log(window.innerWidth);
     };
     window.addEventListener("resize", resizeListener);
 
@@ -89,15 +80,24 @@ function CatViewer() {
   }, []);
 
   useEffect(() => {
-    if (data && data.pages.length > 0 && inView) {
+    if (inView) {
       console.log("in view!!");
       fetchNextPage();
     }
-  }, [data, fetchNextPage, inView]);
+  }, [fetchNextPage, inView]);
 
-  if (isLoading) return <S.Loading>Loading...</S.Loading>;
+  if (status === "pending") return <S.Loading>Loading...</S.Loading>;
 
-  if (isError) return <div>Error...</div>;
+  if (status === "error")
+    return (
+      <>
+        <h4>
+          죄송합니다. 데이터를 불러오는 중에 에러가 발생하였습니다. 새로고침 후
+          다시 시도해주시기 바랍니다.
+        </h4>
+        <div>{`Error: ${error.message}`}</div>
+      </>
+    );
 
   return (
     <S.CatViewerContainer>
@@ -105,13 +105,14 @@ function CatViewer() {
         <S.HorizontalFlex>
           {getItemInColumn().map((col, colIdx) => {
             return (
-              <S.VerticalFlex className={`column${colIdx}`}>
+              <S.VerticalFlex key={`catViewerColumn${colIdx}`}>
                 {col.map((img: CatsInterface, imgIdx: number) => {
                   return (
                     <S.CatViewImage
+                      key={`catImage${imgIdx}`}
                       src={img.url}
                       alt="this is cat"
-                      expanded={expandedImageId === img.id}
+                      $expanded={Boolean(expandedImageId === img.id)}
                       onClick={() => {
                         toggleImage(img.id);
                       }}
@@ -122,8 +123,8 @@ function CatViewer() {
             );
           })}
         </S.HorizontalFlex>
+        <div ref={ref} style={{ height: "50px" }} />
         {isFetchingNextPage && <S.Loading>Loading...</S.Loading>}
-        <div ref={ref} />
       </S.CatViewerListContainer>
     </S.CatViewerContainer>
   );

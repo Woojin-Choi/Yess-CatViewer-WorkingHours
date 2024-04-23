@@ -28,13 +28,18 @@ const WorkingHours = () => {
         <h4>Working hour</h4>
         <div>
           <h4>Set your weekly hours</h4>
-          {daysAndTime.map((d) => {
+          {daysAndTime.map((d, idx) => {
             return (
-              <S.DropdownPanelContainer>
+              <S.DropdownPanelContainer key={`dropdownPanel${idx}`}>
                 <S.DropdownPanelDay>{d.day}</S.DropdownPanelDay>
                 <S.DropdownPanelMain>
-                  {d.time.map((time: TimeInterface) => {
-                    return <RangeInput time={time} />;
+                  {d.time.map((time: TimeInterface, timeIdx: number) => {
+                    return (
+                      <RangeInput
+                        key={`dropdownPanelMain${timeIdx}`}
+                        time={time}
+                      />
+                    );
                   })}
                 </S.DropdownPanelMain>
               </S.DropdownPanelContainer>

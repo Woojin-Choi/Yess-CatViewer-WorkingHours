@@ -10,13 +10,13 @@ const CatViewerListContainer = styled.div`
   /* border: 1px solid black; */
 `;
 
-const CatViewImage = styled.img<{ expanded: boolean }>`
+const CatViewImage = styled.img<{ $expanded: boolean }>`
   width: 100%;
   &:hover {
     cursor: pointer;
   }
   ${(props) =>
-    props.expanded &&
+    props.$expanded &&
     css`
       position: fixed;
       top: 0;
