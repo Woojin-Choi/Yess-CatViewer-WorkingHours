@@ -16,18 +16,7 @@ function CatViewer() {
   const { ref, inView } = useInView();
 
   const [innerWidth, setInnerWidth] = useState(window.innerWidth);
-
-  useEffect(() => {
-    const resizeListener = () => {
-      setInnerWidth(window.innerWidth);
-      // console.log(window.innerWidth);
-    };
-    window.addEventListener("resize", resizeListener);
-
-    return () => {
-      window.removeEventListener("resize", resizeListener);
-    };
-  }, []);
+  const [expandedImageId, setExpandedImageId] = useState("");
 
   const {
     data,
@@ -46,6 +35,15 @@ function CatViewer() {
       return allPages.length + 1;
     },
   });
+
+  const toggleImage = (selectedImageId: string) => {
+    if (expandedImageId === selectedImageId) {
+      setExpandedImageId("");
+    } else {
+      setExpandedImageId(selectedImageId);
+    }
+    console.log(selectedImageId);
+  };
 
   const getItemInColumn = useCallback(() => {
     let colCount = 1;
@@ -79,6 +77,18 @@ function CatViewer() {
   }, [data, innerWidth]);
 
   useEffect(() => {
+    const resizeListener = () => {
+      setInnerWidth(window.innerWidth);
+      // console.log(window.innerWidth);
+    };
+    window.addEventListener("resize", resizeListener);
+
+    return () => {
+      window.removeEventListener("resize", resizeListener);
+    };
+  }, []);
+
+  useEffect(() => {
     if (data && data.pages.length > 0 && inView) {
       console.log("in view!!");
       fetchNextPage();
@@ -93,12 +103,20 @@ function CatViewer() {
     <S.CatViewerContainer>
       <S.CatViewerListContainer>
         <S.HorizontalFlex>
-          {getItemInColumn().map((item, idx) => {
+          {getItemInColumn().map((col, colIdx) => {
             return (
-              <S.VerticalFlex className={`column${idx}`}>
-                {/* {item[0].url} */}
-                {item.map((cat: CatsInterface) => {
-                  return <S.CatVieweImage src={cat.url} alt="this is cat" />;
+              <S.VerticalFlex className={`column${colIdx}`}>
+                {col.map((img: CatsInterface, imgIdx: number) => {
+                  return (
+                    <S.CatViewImage
+                      src={img.url}
+                      alt="this is cat"
+                      expanded={expandedImageId === img.id}
+                      onClick={() => {
+                        toggleImage(img.id);
+                      }}
+                    />
+                  );
                 })}
               </S.VerticalFlex>
             );

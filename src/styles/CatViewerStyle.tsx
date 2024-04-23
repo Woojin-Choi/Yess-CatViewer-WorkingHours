@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 const CatViewerContainer = styled.div`
   display: flex;
@@ -10,8 +10,23 @@ const CatViewerListContainer = styled.div`
   /* border: 1px solid black; */
 `;
 
-const CatVieweImage = styled.img`
+const CatViewImage = styled.img<{ expanded: boolean }>`
   width: 100%;
+  &:hover {
+    cursor: pointer;
+  }
+  ${(props) =>
+    props.expanded &&
+    css`
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: contain;
+      object-position: center;
+      z-index: 9999;
+    `}
 `;
 
 const Loading = styled.div`
@@ -35,7 +50,7 @@ const VerticalFlex = styled.div`
 export {
   CatViewerContainer,
   CatViewerListContainer,
-  CatVieweImage,
+  CatViewImage,
   Loading,
   HorizontalFlex,
   VerticalFlex,
