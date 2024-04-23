@@ -81,7 +81,7 @@ function CatViewer() {
 
   useEffect(() => {
     if (inView) {
-      console.log("in view!!");
+      // console.log("in view!!");
       fetchNextPage();
     }
   }, [fetchNextPage, inView]);
