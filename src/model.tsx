@@ -7,4 +7,9 @@ interface CatsInterface {
   categories: [];
 }
 
-export type { CatsInterface };
+interface TimeInterface {
+  start: string;
+  end: string;
+}
+
+export type { CatsInterface, TimeInterface };
